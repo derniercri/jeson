@@ -12,6 +12,7 @@
 -export([to_int/1]).
 -export([to_float/1]).
 -export([to_atom/1]).
+-export([to_bool/1]).
 
 %% Check if a list is a String
 -spec is_string(list()) -> boolean().
@@ -114,5 +115,15 @@ to_atom(Object) when is_number(Object) ->
     to_atom(Pred).
         
 
-%% Tuple and list coersion
-
+%% Boolean coersion rules
+-spec to_bool(primitive_for_int()) -> wrapped_result().
+to_bool(Object) when is_atom(Object) -> {ok, not (Object == false)};
+to_bool(Object) when is_list(Object) ->
+    case string:to_lower(Object) of 
+        "true" -> {ok, true};
+        "false" -> {ok, false};
+        _ -> {error, true}
+    end;
+to_bool(0) -> {ok, false};
+to_bool(1) -> {ok, true};
+to_bool(_) -> {error, true}. 
