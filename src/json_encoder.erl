@@ -1,18 +1,11 @@
  %% @author Arthur d'Azémar
  %% @doc function for convert erlang value into json string and json string into erlang value
 
--module(json_converter).
--export([gen_converter/2]).
-
--type json_type() ::
-	'int'
-      | 'atom'
-      | 'float'
-      | 'string'
-      | {'object', fun ((tuple()) -> nonempty_string())}
-      | {'pure_list', json_type()}
-      | {'impure_list', [json_type()]}.
-
+-module(json_encoder).
+-export([gen_encoder/2]).
+-include("json_converter.hrl").
+-author(["Arthur d'Azémar", "Xavier van De Woestyne"]).
+-vsn(1).
 
 -spec value_to_json(json_type(), any()) -> string().
 value_to_json (int, Val)  ->
@@ -78,8 +71,8 @@ record_to_json_aux(List) ->
 
 %% renvoi une fonction permetant de transformé le record spécifié en argument en une chaine json
 %% @doc generate a fonction which convert erlang value into a json string
--spec gen_converter( [json_type()], [string()]) -> fun ((tuple()) -> nonempty_string()).
-gen_converter (Type_list, Fields) ->
+-spec gen_encoder( [json_type()], [string()]) -> fun ((tuple()) -> nonempty_string()).
+gen_encoder (Type_list, Fields) ->
     fun (Record) ->
 	    record_to_json(Fields, Type_list, Record)
     end.
