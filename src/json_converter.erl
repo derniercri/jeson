@@ -1,7 +1,8 @@
+ %% @author Arthur d'Azémar
+ %% @doc function for convert erlang value into json string and json string into erlang value
+
 -module(json_converter).
--export([toto/0]).
-
-
+-export([gen_converter/2]).
 
 -type json_type() ::
 	'int'
@@ -47,7 +48,7 @@ json_field(Field, Val) ->
 -spec json_field(string(), json_type(), string()) -> string().
 json_field(Field, string, Val) ->
     json_field(Field, Val);
-json_field(Field, Type, Val) ->
+pjson_field(Field, Type, Val) ->
     json_field(Field, value_to_json(Type, Val)).
 
 %% Transforme un record en chaine json
@@ -70,6 +71,7 @@ record_to_json_aux(List) ->
 	lists:foldl(P, "", T).
 
 %% renvoi une fonction permetant de transformé le record spécifié en argument en une chaine json
+%% @doc generate a fonction which convert erlang value into a json string
 -spec gen_converter( [json_type()], [string()]) -> fun ((tuple()) -> nonempty_string()).
 gen_converter (Type_list, Fields) ->
     fun (Record) ->
