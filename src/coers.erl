@@ -113,3 +113,6 @@ to_atom(Object) when is_number(Object) ->
     Pred = to_string(Object),
     to_atom(Pred).
         
+
+%% Tuple and list coersion
+
