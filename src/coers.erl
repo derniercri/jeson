@@ -8,9 +8,16 @@
 -include("coers_type.hrl").
 
 
--export([to_string/1, of_string/1]).
+-export([is_string/1, to_string/1, of_string/1]).
 -export([to_int/1]).
 -export([to_float/1]).
+-export([to_atom/1]).
+
+%% Check if a list is a String
+-spec is_string(list()) -> boolean().
+is_string(List) when is_list(List) -> 
+    lists:all(fun(X) -> (X >= 32) and (X < 127) end, List);
+is_string(_) -> false. 
 
 %% Try to convert a term into a String
 -spec to_string(any()) -> string().
@@ -51,7 +58,7 @@ string_color(String) ->
     end.
 
 %% Int coersion rules
--spec to_int(primitive_for_int()) -> integer().
+-spec to_int(primitive_for_int()) -> wrapped_result().
 to_int(Object) when is_integer(Object) -> {ok, Object};
 to_int(Object) when is_float(Object) -> round(Object);
 to_int(Object) when is_list(Object) -> 
@@ -73,7 +80,7 @@ to_int(Object) when is_atom(Object) ->
 to_int(_) -> {error, 0}. 
 
 %% Float coersion rules
--spec to_float(primitive_for_int()) -> float().
+-spec to_float(primitive_for_int()) -> wrapped_result().
 to_float(Object) when is_float(Object) -> {ok, Object};
 to_float(Object) when is_integer(Object) -> float(Object);
 to_float(Object) when is_list(Object) ->
@@ -90,7 +97,19 @@ to_float(Object) when is_atom(Object) ->
         Pred = atom_to_list(Object),
         to_float(Pred) of 
         Result -> Result
-    catch _:_ -> {error, 0}
+    catch _:_ -> {error, 0.0}
     end;
 to_float(_) -> {error, 0.0}.
 
+%% Atom coersion rules
+-spec to_atom(primitive_for_int()) -> wrapped_result().
+to_atom(Object) when is_atom(Object) -> {ok, Object};
+to_atom(Object) when is_list(Object)-> 
+    try list_to_atom(Object) of 
+        Result -> {ok, Result}
+    catch _:_ -> {error, false}
+    end;
+to_atom(Object) when is_number(Object) -> 
+    Pred = to_string(Object),
+    to_atom(Pred).
+        
