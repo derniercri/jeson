@@ -9,6 +9,7 @@
       | 'atom'
       | 'float'
       | 'string'
+      | {'object', fun ((tuple()) -> nonempty_string())}
       | {'pure_list', json_type()}
       | {'impure_list', [json_type()]}.
 
@@ -20,6 +21,8 @@ value_to_json (atom, Val) ->
     atom_to_list(Val);
 value_to_json (float, Val) ->
     float_to_list(Val);
+value_to_json ({object, F}, Val) ->
+    F(Val);
 value_to_json (List_type, Val) ->
     list_to_json(List_type, Val).
 
@@ -37,9 +40,12 @@ list_to_json({pure_list, Type}, List) ->
     lists:foldl(P,Acc0, T) ++ "]".
 
 
+%% entoure une chaine de guillemet
+quote(S) -> [$"] ++ S ++ [$"].
+
 -spec json_field(string(), string()) -> string().
 json_field(Field, Val) ->
-    Field ++ ":" ++ Val.
+   quote(Field) ++ ":" ++ Val.
 
 %% creer un champ json ,
 %% Field est le nom du champ,
@@ -47,7 +53,7 @@ json_field(Field, Val) ->
 %% Val sa valeur
 -spec json_field(string(), json_type(), string()) -> string().
 json_field(Field, string, Val) ->
-    json_field(Field, Val);
+    json_field(quote(Field), Val);
 pjson_field(Field, Type, Val) ->
     json_field(Field, value_to_json(Type, Val)).
 
