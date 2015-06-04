@@ -3,10 +3,10 @@ EBIN = ebin
 SRC = src
 COMPILE = erlc -I $(INCLUDE) -pa $(EBIN) -o $(EBIN)
 .PHONY: all clean
-
+OBJ= coers.beam json_converter.beam
 
 # Compile all modules
-all: coers.beam
+all:${OBJ}
 
 # General rules
 %.beam: src/%.erl
