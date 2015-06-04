@@ -10,7 +10,7 @@
 
 -export([to_string/1, of_string/1]).
 -export([to_int/1]).
-
+-export([to_float/1]).
 
 %% Try to convert a term into a String
 -spec to_string(any()) -> string().
@@ -39,11 +39,58 @@ of_string(String) ->
             end;
         {error, {_, Mod, Desc}, _} -> {error, Mod, Desc}
     end.
-            
+
+%% Return the color of a string
+-spec string_color(string()) -> atom().
+string_color(String) ->
+    {ok, Regexp} = re:compile("^\\d+(\\.|\\,)?"),
+    case re:run(String, Regexp) of 
+        {match, [_A]} -> integer;
+        {match, [_A,_B]} -> float;            
+        _ -> any
+    end.
+
 %% Int coersion rules
+-spec to_int(primitive_for_int()) -> integer().
 to_int(Object) when is_integer(Object) -> {ok, Object};
-to_int(Object) when is_list(Object) -> list_to_integer(Object);  
 to_int(Object) when is_float(Object) -> round(Object);
+to_int(Object) when is_list(Object) -> 
+    try list_to_integer(Object) of 
+        Result -> {ok, Result}
+    catch _:_ ->
+            case string_color(Object) of 
+                float -> to_int(list_to_float(Object));
+                _ -> {error, 0}
+            end
+    end;
 to_int(Object) when is_atom(Object) -> 
-    Pred = atom_to_list(Object),
-    to_int(Pred).
+    try
+        Pred = atom_to_list(Object),
+        to_int(Pred) of 
+        Result -> Result
+    catch  _:_ -> {error, 0}
+    end;
+to_int(_) -> {error, 0}. 
+
+%% Float coersion rules
+-spec to_float(primitive_for_int()) -> float().
+to_float(Object) when is_float(Object) -> {ok, Object};
+to_float(Object) when is_integer(Object) -> float(Object);
+to_float(Object) when is_list(Object) ->
+    try list_to_float(Object) of 
+        Result -> {ok, Result}
+    catch _:_ ->
+            case string_color(Object) of 
+                integer -> to_float(list_to_integer(Object));
+                _ -> {error, 0.0}
+            end
+    end;
+to_float(Object) when is_atom(Object) ->
+    try
+        Pred = atom_to_list(Object),
+        to_float(Pred) of 
+        Result -> Result
+    catch _:_ -> {error, 0}
+    end;
+to_float(_) -> {error, 0.0}.
+
