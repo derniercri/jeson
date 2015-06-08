@@ -3,14 +3,14 @@ EBIN = ebin
 SRC = src
 COMPILE = erlc -I $(INCLUDE) -pa $(EBIN) -o $(EBIN)
 .PHONY: all clean
-OBJ= coers.beam json_converter.beam
+OBJ= coers.beam json_encoder.beam json_decoder.beam
 
 # Compile all modules
 all:${OBJ}
 
 # General rules
 %.beam: src/%.erl
-	dialyzer $(<)
+	# dialyzer $(<)
 	$(COMPILE) $(<)
 
 # Run with the library
