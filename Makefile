@@ -10,7 +10,7 @@ all:${OBJ}
 
 # General rules
 %.beam: src/%.erl
-	# dialyzer $(<)
+	dialyzer $(<)
 	$(COMPILE) $(<)
 
 # Run with the library

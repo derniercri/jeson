@@ -129,6 +129,16 @@ parse_pure_list(String, Type) ->
 	    lists:reverse(lists:foldl(P, [], Value_list));
 	_ -> throw("parse error, the list must begin with a [")
     end.
+
+parse_impure_list(String, Types) ->
+    case (String) of
+	[$[ | List_string] ->  
+	    P = fun ({Value, Type}, Acc) -> [convert_value(Value, Type) | Acc] end,
+	    Value_list = extract_list_value(String),
+	    Info_list = lists:zip(Value_list, Types),
+	    lists:reverse(lists:foldl(P, [], Info_list));
+	_ -> throw("parse error, the list must begin with a [")
+    end.
 	    
 extract_field_name(String) ->
     extract_field_name(String, "").
@@ -151,13 +161,14 @@ convert_value(Value, Type) ->
 
 convert_value_aux(Value, int) ->
     coers:to_int(Value);
+convert_value_aux(Value, string) ->
+    {ok, Value};
 convert_value_aux(Value, atom) ->
     coers:to_atom(Value);
 convert_value_aux(Value, {pure_list, Type}) ->
     {ok, parse_pure_list(Value, Type)};
-    %% catch
-    %% 	Exn -> {error, Exn}
-    %% end;
+convert_value_aux(Value, {impure_list, Type}) ->
+    {ok, parse_impure_list(Value, Type)};
 convert_value_aux(Value, float) ->
     coers:to_float(Value).
 
@@ -184,6 +195,9 @@ parse_object([C | T], Field_info, Acc) ->
 			   {ok, {pure_list, Type}} ->
 			       {Value, T4} = extract_list(T3),
 			       parse_object(T4, Field_info, maps:put(Field_name, convert_value(Value, {pure_list, Type}), Acc));
+			   {ok, {impure_list, Type}} ->
+			       {Value, T4} = extract_list(T3),
+			       parse_object(T4, Field_info, maps:put(Field_name, convert_value(Value, {impure_list, Type}), Acc));
 			   {ok, Type} -> 
 			       {Value, T4} = extract_value(T3),
 			       parse_object(T4, Field_info, maps:put(Field_name, convert_value(Value, Type), Acc))
@@ -207,11 +221,14 @@ json_to_record(String, Type_list, Record_name, Fields) ->
     map_to_record(Result, Fields, Record_name).
     
 
+
+%% @doc generate a function which convert a json string into an erlang record
+%% @spec gen_decoder(Type_list:: [json_type()], Fields::[string()], Record_name::atom()) -> fun ((string()) -> tuple())
+%% gen_encoder(Type_list, Fields, Record_name)
+-spec gen_decoder(Type_list:: [json_type()], Fields::[string()], Record_name::atom()) -> fun ((string()) -> tuple()).
 gen_decoder(Type_list, Fields, Record_name) ->
     fun(String) ->
 	    json_to_record(String, Type_list, Record_name, Fields)
     end.
 
-%% @doc generate a function which convert a json string into an erlang record
-%% @spec gen_encoder(Type_list:: [json_type()], Fields::[string()], Record_name::atom()) -> tuple()
-%% gen_encoder(Type_list, Fields, Record_name)
+
