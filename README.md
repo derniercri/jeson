@@ -62,7 +62,7 @@ Il faut d'abord générer la fonction permettant de convertir l'objet c3 en reco
   
 		F = json:gen_encoder([int], ["c1"]).
   
-	  On génère ensuite la fonction général :
+  On génère ensuite la fonction général :
   
 		F2 = json:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
 		["c1","c2","c3"]).
