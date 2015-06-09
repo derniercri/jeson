@@ -3,7 +3,7 @@ EBIN = ebin
 SRC = src
 COMPILE = erlc -I $(INCLUDE) -pa $(EBIN) -o $(EBIN)
 .PHONY: all clean
-OBJ= coers.beam json_encoder.beam json_decoder.beam
+OBJ= coers.beam json_encoder.beam json_decoder.beam json.beam
 
 # Compile all modules
 all:${OBJ}

@@ -2,7 +2,7 @@
  %% @doc function for convert erlang value into json string and json string into erlang value
 
 -module(json_decoder).
--export([gen_decoder/3]).
+-export([gen/3]).
 -include("json_type.hrl").
 -author(["Arthur d'Azémar", "Xavier van De Woestyne"]).
 -vsn(1).
@@ -260,8 +260,9 @@ json_to_record(String, Type_list, Record_name, Fields) ->
     Result= parse_object(String, Map),
     map_to_record(Result, Fields, Record_name).
     
-
-gen_decoder(Type_list, Fields, Record_name) ->
+%% @doc generate a function which convert a json string into an erlang record
+%% @spec gen(Type_list:: [json_type()], Fields::[string()], Record_name::atom()) -> fun ((string()) -> tuple())
+gen(Type_list, Fields, Record_name) ->
     fun(String) ->
 	    json_to_record(String, Type_list, Record_name, Fields)
     end.
