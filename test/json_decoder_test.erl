@@ -1,4 +1,4 @@
--module(gen_decoder_test).
+-module(json_decoder_test).
 -include_lib("eunit/include/eunit.hrl").
 -include("json_type.hrl").
 -author(["Arthur d'Azémar", "Xavier van De Woestyne"]).
