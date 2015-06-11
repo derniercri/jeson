@@ -2,7 +2,7 @@
  %% @doc function for convert erlang value into json string and json string into erlang value
 
 -module(json_decoder).
--export([gen/3]).
+-compile(export_all).
 -include("json_type.hrl").
 -author(["Arthur d'Azémar", "Xavier van De Woestyne"]).
 -vsn(1).
@@ -95,7 +95,8 @@ extract_object([C | T], Acc, In_string, N, Sep_end, Sep_begin) ->
     extract_object(T, [C | Acc], In_string, N, Sep_end, Sep_begin).
 
 
-%%renvoi la liste des valeurs extraites
+%%prend en entrée une chaine représentant une liste et renvoie la liste de ces valeurs.
+%%chaque valeurs est représenté sous forme de string
 -spec extract_list_value(string()) -> [string()].
 extract_list_value(String) ->
     [_ | T] = String,
@@ -115,7 +116,11 @@ extract_list_value([$" | T], {Acc_value, Acc_list}, true, N_accolade, N) ->
     end;
 extract_list_value([C | _], Acc, false, _, 1) when (C =:= $]) ->
     {Acc_value, Acc_list} = Acc,
-    lists:reverse([string:strip(lists:reverse(Acc_value), both)  | Acc_list]);
+
+    case string:strip(lists:reverse(Acc_value), both) of
+	[] -> lists:reverse(Acc_list);
+	Val -> lists:reverse([ Val | Acc_list])
+    end;
 extract_list_value([C | T], Acc, false, N_accolade, N_bracket) when C =:= $[->
     {Acc_value, Acc_list} = Acc,
     Acc2 = {[C | Acc_value], Acc_list},
@@ -222,9 +227,9 @@ parse_object([C | T], Field_info, Acc) ->
 			       {Value, T4} = extract_string(T3),
 			       Acc2 = maps:put(Field_name, Value, Acc),
 			       parse_object(T4, Field_info, Acc2);
-			   {ok, {ipure_list, Type}} ->
+			   {ok, {pure_list, Type}} ->
 			       {Value, T4} = extract_object(T3, $], $[),
-			       Value2 = convert_value(Value, {impure_list, Type}),
+			       Value2 = convert_value(Value, {pure_list, Type}),
 			       Acc2 = maps:put(Field_name, Value2, Acc),
 			       parse_object(T4, Field_info, Acc2);
 			   {ok, {impure_list, Type}} ->
