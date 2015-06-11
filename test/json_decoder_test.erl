@@ -54,6 +54,12 @@ extract_object_object_with_list_test() ->
     Result = "{l1:[1,2,3], l2:[4,5], l3:[]}",
     ?assertEqual(json_decoder:extract_object(String, $}, ${), {Result, "end_of_object],],],"}).
 
+%%reduce_escape
+reduce_escape_1_test() ->
+    ?assertEqual(json_decoder:reduce_escape("\\toto\\\\titi\\\\\\"), "toto\\titi\\\\").
+
+reduce_escape_2_test() ->
+    ?assertEqual(json_decoder:reduce_escape("\\toto\\\\titi\\\\\\qsd"), "toto\\titi\\\\qsd").
 
 %%gen_decoder
 
@@ -63,5 +69,6 @@ gen_decoder_test() ->
     F2 = json_decoder:gen([{pure_list, int}, {impure_list, [string, int]},{object, F1}],
 			  ["c1","c2","c3"],
 			  record2),
-    ?assertEqual(F2(String), {record2, [1,2,3], ["toto", 1], {record1, 123}}).
+    ?assertEqual(F2(String), {record2, [1,2,3], ["toto", 4], {record1, 123}}).
+
 

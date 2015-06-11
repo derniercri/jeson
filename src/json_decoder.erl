@@ -7,6 +7,25 @@
 -author(["Arthur d'Azémar", "Xavier van De Woestyne"]).
 -vsn(1).
 
+%%réduit l'échapement d'une string
+reduce_escape(String) ->
+    reduce_escape(String, "", "").
+reduce_escape([], [_|Acc_escape], Acc) ->
+    S = Acc_escape ++ Acc,
+    reduce_escape([], [], S);
+reduce_escape([], [], Acc) ->
+    lists:reverse(Acc);
+reduce_escape([C | T], Acc_escape, Acc) when C =:= $\\->
+    reduce_escape(T, [C | Acc_escape], Acc);
+reduce_escape([C | T], [], Acc) ->
+    reduce_escape(T, [], [C | Acc]);
+reduce_escape([C | T], [_ | Acc_escape], Acc) ->
+    reduce_escape(T, "", [C | Acc_escape ++ Acc]).
+
+
+
+    
+
 
 %% enlève les espace et le : entre le nom d'un champ et sa valeur
 purify(String) -> purify(String, false).
@@ -192,7 +211,9 @@ convert_value(Value, Type) ->
 convert_value_aux(Value, int) ->
     coers:to_int(Value);
 convert_value_aux(Value, string) ->
-    {ok, Value};
+    Reduce_value = reduce_escape(Value),
+    Striped_value = string:strip(Reduce_value, both, $"),
+    {ok, Striped_value};
 convert_value_aux(Value, atom) ->
     coers:to_atom(Value);
 convert_value_aux(Value, {pure_list, Type}) ->
@@ -225,7 +246,7 @@ parse_object([C | T], Field_info, Acc) ->
 			   error -> throw(wrong_field_name);
 			   {ok, string} ->
 			       {Value, T4} = extract_string(T3),
-			       Acc2 = maps:put(Field_name, Value, Acc),
+			       Acc2 = maps:put(Field_name, reduce_escape(Value), Acc),
 			       parse_object(T4, Field_info, Acc2);
 			   {ok, {pure_list, Type}} ->
 			       {Value, T4} = extract_object(T3, $], $[),
