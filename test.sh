@@ -7,7 +7,7 @@ do
 	echo "error : file ebin/$i.beam doesn't exist"
     else
 	echo "=================="
-	echo "Testing module : $1"
+	echo "Testing module : $i"
 	echo "=================="
 	erl -pa ebin -noshell -s $i test -s init stop
     fi
