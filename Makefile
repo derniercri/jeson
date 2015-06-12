@@ -14,8 +14,9 @@ init_travis:
 c_test: ${TEST}
 
 #Run the Test
-test:init_travis all c_test
-	./test.sh ${TEST}
+test:init_travis all c_test run_test
+	erl -pa ebin -noshell -s run_test run -a ${TEST}
+
 
 # General rules
 %.beam: src/%.erl

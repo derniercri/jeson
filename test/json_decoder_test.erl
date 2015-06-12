@@ -69,7 +69,7 @@ gen_decoder_test() ->
     F2 = json_decoder:gen([{pure_list, int}, {impure_list, [string, int]},{object, F1}],
 			  ["c1","c2","c3"],
 			  record2),
-    ?assertEqual(F2(String), {record2, [1,2,3], ["toto", 4], {record1, 123}}).
+    ?assertEqual(F2(String), {record2, [1,2,3], ["toto", 5], {record1, 123}}).
 
 %% gen_decoder_extern_test() ->
 %%     Coord_fun = json_decoder:gen([float, float], ["lon", "lat"], coord),
