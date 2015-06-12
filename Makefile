@@ -8,7 +8,10 @@ TEST=json_decoder_test
 # Compile all modules
 all:${OBJ}
 
-c_test:${TEST}
+init_travis:
+	mkdir ebin
+
+c_test:init_travis ${TEST}
 
 #Run the Test
 test:all c_test
