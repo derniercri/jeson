@@ -1,5 +1,10 @@
 # LDC-Json
 
+## Integration continue
+
+[![Build Status](https://magnum.travis-ci.com/derniercri/ldc-json.svg?token=p2JVdRH4ZTM3RrdbkBvo&branch=master)](https://magnum.travis-ci.com/derniercri/ldc-json)
+
+
 ## Module json
 
 
