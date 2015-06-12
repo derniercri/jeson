@@ -16,7 +16,6 @@ test:all c_test
 
 # General rules
 %.beam: src/%.erl
-	# dialyzer $(<)
 	$(COMPILE) $(<)
 
 #Test Rules
