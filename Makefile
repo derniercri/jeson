@@ -9,12 +9,12 @@ TEST=json_decoder_test
 all:${OBJ}
 
 init_travis:
-	mkdir ebin
+	test -x ebin || mkdir ebin
 
-c_test:init_travis ${TEST}
+c_test: ${TEST}
 
 #Run the Test
-test:all c_test
+test:init_travis all c_test
 	./test.sh ${TEST}
 
 # General rules
