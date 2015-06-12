@@ -236,6 +236,7 @@ parse_object([C | T], Field_info, Acc) ->
 	${ -> parse_object(T, Field_info, Acc);
 	$} -> Acc;
 	32 -> parse_object(T, Field_info, Acc);
+	$\n -> parse_object(T, Field_info, Acc);
 	$\\ -> case T of 
 		   %%si on tombe sur un caractère échapé on regarde si c'est une guillement (sinon on lance une exepction)
 		   [$" | T2] -> 
@@ -272,7 +273,7 @@ parse_object([C | T], Field_info, Acc) ->
 			       throw("parse_error : " ++ [Carac] ++ "is wrong")
 	       end;
 	C -> io:format("Acc : ~p, S : |~s|~n",[Acc,[C | T]]),
-	     throw("parse_error : " ++ [C] ++ "is wrong")
+	     throw("parse_error : |" ++ [C] ++ "|is wrong")
     end.
 
 map_to_record(Map, Fields, Record_name) ->

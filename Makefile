@@ -5,21 +5,26 @@ COMPILE = erlc -I $(INCLUDE) -pa $(EBIN) -o $(EBIN)
 .PHONY: all clean
 OBJ= coers.beam json_encoder.beam json_decoder.beam json.beam
 TEST=json_decoder_test
+DIALYZER=FALSE
 # Compile all modules
 all:${OBJ}
 
 init_travis:
-	test -x ebin || mkdir ebin
+	mkdir -p ebin
 
-c_test: ${TEST}
 
 #Run the Test
-test:init_travis all c_test run_test
+test:init_travis all ${TEST} run_test
 	erl -pa ebin -noshell -s run_test run -a ${TEST}
 
+local_test: all ${TEST}
+	./test.sh ${TEST}
 
 # General rules
 %.beam: src/%.erl
+ifeq ($(DIALYZER), TRUE)
+	dialyzer  $(<)
+endif
 	$(COMPILE) $(<)
 
 #Test Rules
