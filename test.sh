@@ -12,6 +12,3 @@ do
 	erl -pa ebin -noshell -s $i test -s init stop
     fi
 done
-
-
-

@@ -8,7 +8,11 @@ TEST=json_decoder_test
 # Compile all modules
 all:${OBJ}
 
-test:${TEST}
+c_test:${TEST}
+
+#Run the Test
+test:all c_test
+	./test.sh ${TEST}
 
 # General rules
 %.beam: src/%.erl
@@ -23,9 +27,7 @@ test:${TEST}
 run: all
 	erl -pa $(EBIN)
 
-#Run the Test
-run_test:
-	./test.sh ${TEST}
+
 # Dialyzer initializer
 init-dialyzer:
 	dialyzer --build_plt --apps erts kernel stdlib crypto mnesia sasl common_test eunit

@@ -71,4 +71,17 @@ gen_decoder_test() ->
 			  record2),
     ?assertEqual(F2(String), {record2, [1,2,3], ["toto", 4], {record1, 123}}).
 
+%% gen_decoder_extern_test() ->
+%%     Coord_fun = json_decoder:gen([float, float], ["lon", "lat"], coord),
+%%     Sys_fun = json_decoder:gen([float, string, int, int], ["message", "country", "sunrise", "sunset"], sys),
+%%     Weather_fun = json_decoder:gen([int, string, string, string], ["id","main","description","icon"], weather),
+%%     Main_fun = json_decoder:gen([float, float, float, float, float, float, int], ["temp","temp_min","temp_max","pressure","sea_level","grnd_level","humidity"],
+%% 				main),
+%%     Wind_fun = json_decoder:gen([float, float], ["speed","deg"], wind),
+%%     Cflouds_fun = json_decoder:gen([int], ["all"],cflouds), 
+%%     F = json_decoder([{object, Coord_fun}, {object, Sys_fun}, {
+     
+
+
+				 
 
