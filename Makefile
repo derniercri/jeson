@@ -21,7 +21,7 @@ test:all c_test
 
 #Test Rules
 %_test: test/%_test.erl
-	$(COMPILE) $(<).beam
+	$(COMPILE) $(<)
 
 # Run with the library
 run: all
