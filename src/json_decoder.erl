@@ -19,7 +19,9 @@ reduce_escape([C | T], Acc_escape, Acc) when C =:= $\\->
     reduce_escape(T, [C | Acc_escape], Acc);
 reduce_escape([C | T], [], Acc) ->
     reduce_escape(T, [], [C | Acc]);
-reduce_escape([C | T], [_ | Acc_escape], Acc) ->
+reduce_escape([C | T], [_ | Acc_escape], Acc) when C =:= $\"->
+    reduce_escape(T, "", [C | Acc_escape ++ Acc]);
+reduce_escape([C | T], Acc_escape, Acc) ->
     reduce_escape(T, "", [C | Acc_escape ++ Acc]).
 
 
@@ -38,15 +40,12 @@ purify(_, false) -> throw('parse_error : missing : '). %%le : manque pour sépar
 
 %% extrait une chaine de caractère json 
 -spec extract_string(string()) -> {string(), string()}.
-%% extract_string([ 32 | T]) ->
-%%     extract_value(T);
-%% extract_string([$:| T]) ->
-%%     extract_value(T);
 extract_string(String) ->
     case purify(String) of
-	[$\\, $" | S] -> extract_string(S, "");
+	[$" | S] -> io:format("--------------~n~p~n", [S]),
+		    extract_string(S, "");
 	Other ->
-	    throw("parse_error : the string " ++ Other ++ "dont't begin with \\\"")
+	    throw("parse_error : the string " ++ Other ++ "dont't begin with \"")
     end.
 
 
@@ -59,9 +58,20 @@ extract_string([C | T], Acc) ->
 	(C =:= $,) or (C =:= $}) ->
 	    Acc_striped = string:strip(Acc, left),
 	    case Acc_striped of
-		[$", $\\, $\\ | _] -> extract_string(T, [C | Acc_striped]);
-		%%AF chercher dans l'ACC la strucure [$", $\\ en sortant les espace
-		[$", $\\ | Acc_tail] -> {lists:reverse(Acc_tail), T};
+		[$", $\\| _] -> extract_string(T, [C | Acc_striped]);
+		[$"| Acc_tail] -> {lists:reverse(Acc_tail), T};
+		_ -> extract_string(T, [C | Acc])
+	    end;
+	(C =:= $\n) ->
+	    T_striped = string:strip(T, left),
+	    case T_striped of
+		[ C2 | _] when (C2 =:= $,) or (C2 =:= $}) ->
+		    Acc_striped = string:strip(Acc, left),
+		    case Acc_striped of
+			[$", $\\| _] -> extract_string(T_striped, [C | Acc_striped]);
+			[$"| Acc_tail] -> {lists:reverse(Acc_tail), T};
+			_ -> extract_string(T, [C | Acc])
+		    end;
 		_ -> extract_string(T, [C | Acc])
 	    end;
 	true -> extract_string(T, [C | Acc])
@@ -88,14 +98,11 @@ extract_object(String, Sep_end, Sep_begin) ->
     extract_object(purify(String), "", false, 0, Sep_end, Sep_begin).
 
 extract_object([$" | T], Acc,  false, N, Sep_end, Sep_begin) -> 
-    case simple_echaped(Acc) of  
-	true -> extract_object(T, [$" | Acc], true, N, Sep_end, Sep_begin);
-	false -> throw("parse error : too much \\")
-    end;
+    extract_object(T, [$" | Acc], true, N, Sep_end, Sep_begin);
 extract_object([$" | T], Acc, true, N, Sep_end, Sep_begin) -> 
-	case simple_echaped(Acc) of
-	    true -> extract_object(T, [$" | Acc],  false, N, Sep_end, Sep_begin);
-	    false -> extract_object(T, [$" | Acc], true, N, Sep_end, Sep_begin)
+    case Acc of
+	[$\\ | _] ->  extract_object(T, [$" | Acc], true, N, Sep_end, Sep_begin) ;
+	_ -> extract_object(T, [$" | Acc],  false, N, Sep_end, Sep_begin)
     end;
 extract_object([C | T], Acc, true, N, Sep_end, Sep_begin) ->
     extract_object(T, [C | Acc], true, N, Sep_end, Sep_begin);
@@ -122,16 +129,15 @@ extract_list_value(String) ->
     extract_list_value(T, {"", []}, false, 0, 1).
 
 extract_list_value([$" | T], {Acc_value, Acc_list}, false, N_accolade, N) ->
-    case simple_echaped(Acc_value) of 
-	true -> extract_list_value(T, {[$" | Acc_value],Acc_list}, true, N_accolade, N);
-	false -> throw("parse error : too much \\")
-    end;
+    extract_list_value(T, {[$" | Acc_value],Acc_list}, true, N_accolade, N);
 extract_list_value([$" | T], {Acc_value, Acc_list}, true, N_accolade, N) -> 
-    case simple_echaped(Acc_value) of
-	true -> Acc = { [$" | Acc_value], Acc_list},
-		extract_list_value(T,Acc , false, N_accolade, N);
-	false -> Acc = { [$" | Acc_value], Acc_list},
-		 extract_list_value(T,Acc, true, N_accolade, N)
+    case Acc_value of
+	[$\\ | _] ->
+	    Acc = { [$" | Acc_value], Acc_list},
+	    extract_list_value(T,Acc, true, N_accolade, N);
+	_ ->
+	    Acc = { [$" | Acc_value], Acc_list},
+	    extract_list_value(T,Acc , false, N_accolade, N)
     end;
 extract_list_value([C | _], Acc, false, _, 1) when (C =:= $]) ->
     {Acc_value, Acc_list} = Acc,
@@ -193,8 +199,8 @@ extract_field_name(String) ->
     extract_field_name(String, "").
 extract_field_name([$" | T], Acc) ->
     case Acc of
-	[$\\, $\\ | _] -> extract_field_name(T, [$" | Acc]);
-	[$\\ | Field_name] -> {lists:reverse(Field_name), T}
+	[$\\ | _] -> extract_field_name(T, [$" | Acc]);
+	_ -> {lists:reverse(Acc), T}
     end;
 extract_field_name([H | T], Acc_field_name) ->
     extract_field_name(T, [H | Acc_field_name]).
@@ -237,41 +243,36 @@ parse_object([C | T], Field_info, Acc) ->
 	$} -> Acc;
 	32 -> parse_object(T, Field_info, Acc);
 	$\n -> parse_object(T, Field_info, Acc);
-	$\\ -> case T of 
-		   %%si on tombe sur un caractère échapé on regarde si c'est une guillement (sinon on lance une exepction)
-		   [$" | T2] -> 
-		       %%on extrait le nom du champ
-		       {Field_name, T3} = extract_field_name(T2),
-		       %%on traite la valeur en fonction du type du champ 
-		       case maps:find(Field_name, Field_info) of
-			   error -> throw(wrong_field_name);
-			   {ok, string} ->
-			       {Value, T4} = extract_string(T3),
-			       Acc2 = maps:put(Field_name, reduce_escape(Value), Acc),
-			       parse_object(T4, Field_info, Acc2);
-			   {ok, {pure_list, Type}} ->
-			       {Value, T4} = extract_object(T3, $], $[),
-			       Value2 = convert_value(Value, {pure_list, Type}),
-			       Acc2 = maps:put(Field_name, Value2, Acc),
-			       parse_object(T4, Field_info, Acc2);
-			   {ok, {impure_list, Type}} ->
-			       {Value, T4} = extract_object(T3, $], $[),
-			       Value2 = convert_value(Value, {impure_list, Type}),
-			       Acc2 =  maps:put(Field_name, Value2, Acc),
-			       parse_object(T4, Field_info,Acc2);
-			   {ok, {object, F}} ->
-			       {Value, T4} = extract_object(T3, $}, ${),
-			       Acc2 = maps:put(Field_name, F(Value), Acc),
-			       parse_object(T4, Field_info, Acc2);
-			   {ok, Type} -> 
-			       {Value, T4} = extract_value(T3),
-			       Value2 = convert_value(Value, Type),
-			       Acc2 = maps:put(Field_name, Value2, Acc),
-			       parse_object(T4, Field_info, Acc2)
-		       end;
-		   [Carac | _] ->  io:format("Acc2 : ~p, S : |~s|~n",[Acc,[C | T]]),
-			       throw("parse_error : " ++ [Carac] ++ "is wrong")
-	       end;
+	$" ->
+	    %%on extrait le nom du champ
+	    {Field_name, T2} = extract_field_name(T),
+	    %%on traite la valeur en fonction du type du champ 
+	    case maps:find(Field_name, Field_info) of
+		error -> throw(wrong_field_name);
+		{ok, string} ->
+		    {Value, T3} = extract_string(T2),
+		    Acc2 = maps:put(Field_name, reduce_escape(Value), Acc),
+		    parse_object(T3, Field_info, Acc2);
+		{ok, {pure_list, Type}} ->
+		    {Value, T3} = extract_object(T2, $], $[),
+		    Value2 = convert_value(Value, {pure_list, Type}),
+		    Acc2 = maps:put(Field_name, Value2, Acc),
+		    parse_object(T3, Field_info, Acc2);
+		{ok, {impure_list, Type}} ->
+		    {Value, T3} = extract_object(T2, $], $[),
+		    Value2 = convert_value(Value, {impure_list, Type}),
+		    Acc2 =  maps:put(Field_name, Value2, Acc),
+		    parse_object(T3, Field_info,Acc2);
+		{ok, {object, F}} ->
+		    {Value, T3} = extract_object(T2, $}, ${),
+		    Acc2 = maps:put(Field_name, F(Value), Acc),
+		    parse_object(T3, Field_info, Acc2);
+		{ok, Type} -> 
+		    {Value, T3} = extract_value(T2),
+		    Value2 = convert_value(Value, Type),
+		    Acc2 = maps:put(Field_name, Value2, Acc),
+		    parse_object(T3, Field_info, Acc2)
+	    end;
 	C -> io:format("Acc : ~p, S : |~s|~n",[Acc,[C | T]]),
 	     throw("parse_error : |" ++ [C] ++ "|is wrong")
     end.
