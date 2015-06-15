@@ -16,6 +16,8 @@ value_to_json (float, Val) ->
     float_to_list(Val);
 value_to_json ({object, F}, Val) ->
     F(Val);
+value_to_json (string, Val) ->
+    quote(escape_quote(Val));
 value_to_json (List_type, Val) ->
     list_to_json(List_type, Val).
 
@@ -36,6 +38,18 @@ list_to_json({pure_list, Type}, List) ->
 %% entoure une chaine de guillemet
 quote(S) -> [$"] ++ S ++ [$"].
 
+%%échape les guillemet interne a la chaine
+escape_quote(String) ->
+    escape_quote(String, "").
+
+escape_quote([], Acc) -> 
+    lists:reverse(Acc);
+escape_quote([C | T], Acc) when C =:= $"->
+    escape_quote(T, [C, $\\ | Acc]);
+escape_quote([C | T], Acc) ->
+    escape_quote(T, [C | Acc]).
+
+
 -spec json_field(string(), string()) -> string().
 json_field(Field, Val) ->
    quote(Field) ++ ":" ++ Val.
@@ -45,8 +59,9 @@ json_field(Field, Val) ->
 %% Type son type
 %% Val sa valeur
 -spec json_field(string(), json_type(), string()) -> string().
-json_field(Field, string, Val) ->
-    json_field(quote(Field), Val);
+%% json_field(Field, string, Val) ->
+%%  quote(escape_quote(Val)),
+%%     json_field(Field, String);
 json_field(Field, Type, Val) ->
     json_field(Field, value_to_json(Type, Val)).
 
