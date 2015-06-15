@@ -14,11 +14,11 @@ init_travis:
 
 
 #Run the Test
-test:init_travis all ${TEST} run_test
-	erl -pa ebin -noshell -s run_test run -a ${TEST}
+test:init_travis all ${TEST} 
+	./run_test.sh ${EBIN} ${TEST}
 
 local_test: all ${TEST}
-	./test.sh ${TEST}
+	./run_test.sh ${EBIN} ${TEST}
 
 # General rules
 %.beam: src/%.erl
