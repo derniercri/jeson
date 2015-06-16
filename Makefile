@@ -7,7 +7,10 @@ OBJ= coers.beam json_encoder.beam json_decoder.beam json.beam
 TEST=json_decoder_test json_encoder_test
 DIALYZER=FALSE
 # Compile all modules
-all:${OBJ}
+all: init ${OBJ}
+
+init:
+	mkdir -p ./ebin
 
 #Run the Test
 test:all ${TEST} 
