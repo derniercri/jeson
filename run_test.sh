@@ -9,5 +9,4 @@ then
     exit 1
 fi
 MODULES=$(echo $* | cut -d " " -f $(seq -s "," 2 $#))
-echo $MODULES
 erl -pa $EBIN -pa $BIN -modules $MODULES -s travis_runner run -noshell

@@ -9,16 +9,9 @@ DIALYZER=FALSE
 # Compile all modules
 all:${OBJ}
 
-init_travis:
-	mkdir -p ebin
-
-
 #Run the Test
-test:init_travis all ${TEST} 
-	./run_test.sh ${EBIN} ${TEST}
-
-local_test: all ${TEST}
-	./run_test.sh ${EBIN} ${TEST}
+test:all ${TEST} 
+	/usr/lib/erl-test-runner/erl-test-runner ${EBIN} ${TEST}
 
 # General rules
 %.beam: src/%.erl

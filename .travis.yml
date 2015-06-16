@@ -1,3 +1,4 @@
 language: erlang
+install: ./travis/install-dependencies.sh
 otp_release:
    - 17.1
