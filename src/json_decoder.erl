@@ -233,7 +233,7 @@ convert_value_aux(Value, float) ->
 
 %% -spec parse_object(string(), #{string() => json_type()}, #{string() => any()}) -> [{string(), any()}].
 parse_object(String, Field_info) ->
-    parse_object(String, Field_info, maps:new()).
+    parse_object(String, Field_info, dict:new()).
 
 parse_object([], _, Acc) -> Acc;
 
@@ -247,30 +247,30 @@ parse_object([C | T], Field_info, Acc) ->
 	    %%on extrait le nom du champ
 	    {Field_name, T2} = extract_field_name(T),
 	    %%on traite la valeur en fonction du type du champ 
-	    case maps:find(Field_name, Field_info) of
+	    case dict:find(Field_name, Field_info) of
 		error -> throw(wrong_field_name);
 		{ok, string} ->
 		    {Value, T3} = extract_string(T2),
-		    Acc2 = maps:put(Field_name, reduce_escape(Value), Acc),
+		    Acc2 = dict:append(Field_name, reduce_escape(Value), Acc),
 		    parse_object(T3, Field_info, Acc2);
 		{ok, {pure_list, Type}} ->
 		    {Value, T3} = extract_object(T2, $], $[),
 		    Value2 = convert_value(Value, {pure_list, Type}),
-		    Acc2 = maps:put(Field_name, Value2, Acc),
+		    Acc2 = dict:append(Field_name, Value2, Acc),
 		    parse_object(T3, Field_info, Acc2);
 		{ok, {impure_list, Type}} ->
 		    {Value, T3} = extract_object(T2, $], $[),
 		    Value2 = convert_value(Value, {impure_list, Type}),
-		    Acc2 =  maps:put(Field_name, Value2, Acc),
+		    Acc2 =  dict:append(Field_name, Value2, Acc),
 		    parse_object(T3, Field_info,Acc2);
 		{ok, {object, F}} ->
 		    {Value, T3} = extract_object(T2, $}, ${),
-		    Acc2 = maps:put(Field_name, F(Value), Acc),
+		    Acc2 = dict:append(Field_name, F(Value), Acc),
 		    parse_object(T3, Field_info, Acc2);
 		{ok, Type} -> 
 		    {Value, T3} = extract_value(T2),
 		    Value2 = convert_value(Value, Type),
-		    Acc2 = maps:put(Field_name, Value2, Acc),
+		    Acc2 = dict:append(Field_name, Value2, Acc),
 		    parse_object(T3, Field_info, Acc2)
 	    end;
 	C -> io:format("Acc : ~p, S : |~s|~n",[Acc,[C | T]]),
@@ -278,13 +278,16 @@ parse_object([C | T], Field_info, Acc) ->
     end.
 
 map_to_record(Map, Fields, Record_name) ->
-    P = fun(Field_name, Acc) ->	[maps:get(Field_name, Map) | Acc] end,
+    P = fun(Field_name, Acc) ->	
+		[Val] =  dict:fetch(Field_name, Map),
+		[Val | Acc] end,
     List = [Record_name | lists:reverse(lists:foldl(P, [], Fields))],
+
     list_to_tuple(List).
 
 
 json_to_record(String, Type_list, Record_name, Fields) ->
-    Map = maps:from_list(lists:zip(Fields, Type_list)),
+    Map = dict:from_list(lists:zip(Fields, Type_list)),
     Result= parse_object(String, Map),
     map_to_record(Result, Fields, Record_name).
     
