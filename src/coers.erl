@@ -5,7 +5,6 @@
 -module(coers).
 -vsn(1).
 -author(["Arthur d'Azémar", "Xavier van De Woestyne"]).
-
 -include("coers_type.hrl").
 
 
@@ -25,8 +24,12 @@ is_string(_) -> false.
 %% @doc Try to convert a term into a String
 -spec to_string(any()) -> string().
 to_string(Term) ->
-    List = io_lib:format("~p", [Term]),
-    lists:flatten(List).
+    case is_string(Term) of 
+        true -> Term;
+        false ->
+            List = io_lib:format("~p", [Term]),
+            lists:flatten(List)
+    end.
 
 %% @doc Try to convert a string into a term, wrapped into a wrapped_result
 -spec of_string(string()) -> wrapped_result().
@@ -62,7 +65,7 @@ string_color(String) ->
 %% @doc Try to convert a term into an integer
 -spec to_int(primitive_for_int()) -> wrapped_result().
 to_int(Object) when is_integer(Object) -> {ok, Object};
-to_int(Object) when is_float(Object) -> round(Object);
+to_int(Object) when is_float(Object) -> {ok, round(Object)};
 to_int(Object) when is_list(Object) -> 
     try list_to_integer(Object) of 
         Result -> {ok, Result}
@@ -84,7 +87,7 @@ to_int(_) -> {error, 0}.
 %% @doc Try to convert a term into a float
 -spec to_float(primitive_for_int()) -> wrapped_result().
 to_float(Object) when is_float(Object) -> {ok, Object};
-to_float(Object) when is_integer(Object) -> float(Object);
+to_float(Object) when is_integer(Object) -> {ok, float(Object)};
 to_float(Object) when is_list(Object) ->
     try list_to_float(Object) of 
         Result -> {ok, Result}

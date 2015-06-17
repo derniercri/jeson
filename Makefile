@@ -4,7 +4,7 @@ SRC = src
 COMPILE = erlc -I $(INCLUDE) -pa $(EBIN) -o $(EBIN)
 .PHONY: all clean
 OBJ= coers.beam json_encoder.beam json_decoder.beam json.beam
-TEST=json_decoder_test json_encoder_test
+TEST=json_decoder_test json_encoder_test coers_test
 DIALYZER=FALSE
 # Compile all modules
 all: init ${OBJ}
