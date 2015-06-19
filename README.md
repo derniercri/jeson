@@ -1,12 +1,14 @@
 # LDC-Json
 
-## Integration continue
-
 [![Build Status](https://magnum.travis-ci.com/derniercri/ldc-json.svg?token=p2JVdRH4ZTM3RrdbkBvo&branch=master)](https://magnum.travis-ci.com/derniercri/ldc-json)
+
+## Installation
+
+ - `make`
+ - `sudo make install`
 
 
 ## Module json
-
 
 ### Fonction
 - `gen_decoder(Type_list, Field_name, Record_name)` :
