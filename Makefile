@@ -6,6 +6,8 @@ COMPILE = erlc -I $(INCLUDE) -pa $(EBIN) -o $(EBIN)
 OBJ= coers.beam json_encoder.beam json_decoder.beam json.beam
 TEST=json_decoder_test json_encoder_test coers_test
 DIALYZER=FALSE
+INSTALL_DIR=/usr/lib/jeson
+
 # Compile all modules
 all: init ${OBJ}
 
@@ -39,3 +41,13 @@ init-dialyzer:
 # Clean binaries
 clean:
 	rm -rf $(EBIN)/*
+
+install:
+	mkdir ${INSTALL_DIR}
+	cp -R ./ebin ${INSTALL_DIR}/
+	cp -R ./include ${INSTALL_DIR}/
+	ln -s ${INSTALL_DIR} /usr/lib/erlang/lib/jeson
+
+uninstall:
+	rm  -Rf ${INSTALL_DIR}
+	rm -f /usr/lib/erlang/lib/jeson
