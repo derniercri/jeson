@@ -16,18 +16,18 @@
 	La structure du record doit être spécifiée pour générer la fonction :
 	
     - `Type_list` est la liste des types de chaque champs du record. (voir plus bas)
-    - `Field_name` est la liste des noms des champs du record. Chaque élément de la liste des noms doit correspondre à un type dans `Type_list`
-	- `Record_name` est le nom du record utilisé pour stocker les données extraites de la chaine json
+    - `Field_name` est la liste des noms des champs du record. Chaque élément de la liste des noms doit correspondre à un type dans `Type_list`. Les nom sont de type string
+	- `Record_name` est le nom du record utilisé pour stocker les données extraites de la chaine json. Le nom est un atom
 
 - `gen_encoder(Type_list, Field_name)` :
     Génère une fonction permetant de convertir un record erlang en une chaine json.
 	La structure du record doit être spécifiée pour générer la fonction :
 	
     - `Type_list` est la liste des types de chaque champ du record. (voir plus bas)
-    - `Field_name` est la liste des noms des champs du record. Chaque élément de la liste des nom doit correspondre à un type dans la liste `Type_list`
+    - `Field_name` est la liste des noms des champs du record. Chaque élément de la liste des nom doit correspondre à un type dans la liste `Type_list`. Les nom sont de type string
 
 ### Spécification de type
-Les types de chaque champs du record doivent être spécifiés pour pouvoir traiter correctement la chaine json. Chaque type est une valeur erlang.
+Les types de chaque champs du record doivent être spécifiés pour pouvoir traiter correctement la chaine json. Chaque type est un atom erlang.
 
 - `int` : un nombre entier
 - `float` : un nombre flottant
