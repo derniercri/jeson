@@ -1,4 +1,4 @@
--module(json).
+-module(jeson).
 -include_lib("eunit/include/eunit.hrl").
 -export([gen_decoder/3, gen_encoder/2]).
 -include("json_type.hrl").

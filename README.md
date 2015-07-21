@@ -8,10 +8,10 @@
  - `sudo make install`
 
 
-## Module json
+## Module jeson
 
 ### Fonction
-- `gen_decoder(Type_list, Field_name, Record_name)` :
+- `jeson:gen_decoder(Type_list, Field_name, Record_name)` :
     Génère une fonction permettant de convertir une chaîne json en un record erlang.
 	La structure du record doit être spécifiée pour générer la fonction :
 	
@@ -19,7 +19,7 @@
     - `Field_name` est la liste des noms des champs du record. Chaque élément de la liste des noms doit correspondre à un type dans `Type_list`. Les nom sont de type string
 	- `Record_name` est le nom du record utilisé pour stocker les données extraites de la chaine json. Le nom est un atom
 
-- `gen_encoder(Type_list, Field_name)` :
+- `jeson:gen_encoder(Type_list, Field_name)` :
     Génère une fonction permetant de convertir un record erlang en une chaine json.
 	La structure du record doit être spécifiée pour générer la fonction :
 	
@@ -47,41 +47,41 @@ Les types de chaque champs du record doivent être spécifiés pour pouvoir trai
 - convertir la chaîne `"{"c1":[1,2,3], "c2":["toto", 1], "c3":{"c1":123}}"` en record erlang :
 Il faut d'abord générer la fonction permettant de convertir l'objet c3 en record :
 
-```erl
-F = json:gen_decoder([int], ["c1"], record1).
-```
+	```erl
+	F = jeson:gen_decoder([int], ["c1"], record1).
+	```
 
 	Puis il faut générer la fonction permettant de convertir la chaîne :
 
-```erl
-F2 = json:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
-["c1","c2","c3"],
-record2).
-```
+	```erl
+	F2 = json:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
+	["c1","c2","c3"],
+	record2).
+	```
 
 	La fonction `F2` peut maintenant être utilisée pour convertir la chaîne précédente (stocké dans S) :
 
-```erl
-F2(S).
-```
+	```erl
+	F2(S).
+	```
 
 	Résultat :
 
-```erl
-{record2, [1,2,3], ["toto", 1], {record1, 123}}
-```
+	```erl
+	{record2, [1,2,3], ["toto", 1], {record1, 123}}
+	```
 
 - convertir le record précédent en chaîne json
   On utilisera les mêmes valeurs pour convertir un record erlang en json.
   Il faut aussi générer la fonction permettant de convertir le record c3 en chaîne json
 
-```erl 
-F = json:gen_encoder([int], ["c1"]).
-```
+	```erl 
+	F = json:gen_encoder([int], ["c1"]).
+	```
   
   On génère ensuite la fonction général :
 
-```erl  
-F2 = json:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
-["c1","c2","c3"]).
-```
+	```erl
+	F2 = json:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
+	["c1","c2","c3"]).
+	```
