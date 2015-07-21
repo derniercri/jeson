@@ -1,4 +1,4 @@
-# LDC-Json
+#Jeson
 
 [![Build Status](https://magnum.travis-ci.com/derniercri/ldc-json.svg?token=p2JVdRH4ZTM3RrdbkBvo&branch=master)](https://magnum.travis-ci.com/derniercri/ldc-json)
 
@@ -54,7 +54,7 @@ Il faut d'abord générer la fonction permettant de convertir l'objet c3 en reco
 	Puis il faut générer la fonction permettant de convertir la chaîne :
 
 	```erl
-	F2 = json:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
+	F2 = jeson:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
 	["c1","c2","c3"],
 	record2).
 	```
@@ -76,12 +76,12 @@ Il faut d'abord générer la fonction permettant de convertir l'objet c3 en reco
   Il faut aussi générer la fonction permettant de convertir le record c3 en chaîne json
 
 	```erl 
-	F = json:gen_encoder([int], ["c1"]).
+	F = jeson:gen_encoder([int], ["c1"]).
 	```
   
   On génère ensuite la fonction général :
 
 	```erl
-	F2 = json:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
+	F2 = jeson:gen_decoder([{pure_list, int}, {impure_list, [string, int]},{object, F}],
 	["c1","c2","c3"]).
 	```
