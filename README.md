@@ -1,6 +1,6 @@
 #Jeson
 
-[![Build Status](https://magnum.travis-ci.com/derniercri/ldc-json.svg?token=p2JVdRH4ZTM3RrdbkBvo&branch=master)](https://magnum.travis-ci.com/derniercri/ldc-json)
+[![Build Status](https://travis-ci.org/derniercri/jeson.svg)](https://travis-ci.org/derniercri/jeson)
 
 ## Installation
 
