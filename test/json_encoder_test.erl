@@ -13,6 +13,7 @@ test_aux(Field_names, Type_list, Record, String) ->
 gen_base_test() ->
     test_aux(["c1", "c2", "c3"],
 	     [int, float, atom],
+
 	     {toto, 1, 1.2, true},
 	     "{\"c1\":1,\"c2\":1.19999999999999995559e+00,\"c3\":true}").
 

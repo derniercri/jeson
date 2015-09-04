@@ -1,0 +1,14 @@
+{application, jeson,
+ [
+  {description, "An Erlang jeson library"},
+  {vsn, "1"},
+  {modules, [
+             jeson
+            ]},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {env, []}
+ ]}.
